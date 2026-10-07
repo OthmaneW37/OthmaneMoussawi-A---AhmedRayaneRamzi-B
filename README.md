@@ -26,6 +26,12 @@ Cette capture montre l'état initial du diagnostic : les dépendances Python ne 
 
 ![Diagnostic initial avant correction](docs/captures/tests-avant-correction.png)
 
+### Après correction des fiches
+
+Les trois approches sont maintenant correctement cochées dans les fiches de cadrage. Cette étape laisse encore 2 erreurs et 1 avertissement liés à la configuration Python et aux commits du binôme.
+
+![Diagnostic après correction des fiches](docs/captures/tests-apres-correction-fiches.png)
+
 ## Membres du binôme
 
 | Rôle | Nom | Identifiant GitHub | Travail de la semaine 1 |
