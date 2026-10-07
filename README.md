@@ -23,4 +23,4 @@ pytest -q
 | Rôle | Nom | Identifiant GitHub | Travail de la semaine 1 |
 | --- | --- | --- | --- |
 | Membre A | Othmane Moussawi | @OthmaneW37 | Cadrage des trois cas et préparation de l'environnement |
-| Membre B | Ahmed Rayane Ramzi | À compléter | Cadrage des trois cas et préparation de l'environnement |
+| Membre B | Ahmed Rayane Ramzi | @RayaneRZ24  | Cadrage des trois cas et préparation de l'environnement |
