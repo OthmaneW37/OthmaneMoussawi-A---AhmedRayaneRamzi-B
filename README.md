@@ -18,6 +18,14 @@ python scripts/check_setup.py
 pytest -q
 ```
 
+## Captures des tests
+
+### Avant correction
+
+Cette capture montre l'état initial du diagnostic : les dépendances Python ne sont pas encore installées et les trois fiches de cadrage ne contiennent pas encore d'approche cochée.
+
+![Diagnostic initial avant correction](docs/captures/tests-avant-correction.png)
+
 ## Membres du binôme
 
 | Rôle | Nom | Identifiant GitHub | Travail de la semaine 1 |
