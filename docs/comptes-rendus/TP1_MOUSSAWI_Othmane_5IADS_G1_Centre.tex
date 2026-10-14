@@ -1,0 +1,155 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm,headheight=15pt]{geometry}
+\usepackage{graphicx,xcolor,fancyhdr,titlesec,enumitem}
+\usepackage{amsmath,amssymb,booktabs,caption,float}
+\usepackage[most]{tcolorbox}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+
+% Palette
+\definecolor{principal}{HTML}{1F3A5F}
+\definecolor{accent}{HTML}{2E86AB}
+\definecolor{fondcode}{HTML}{F5F7FA}
+\definecolor{gris}{HTML}{6B7280}
+
+% Titres
+\titleformat{\section}{\Large\bfseries\color{principal}}{\thesection.}{0.6em}{}[\vspace{-0.4em}\color{accent}\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{accent}}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.6em}{0.8em}
+
+% En-tête / pied de page
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small\color{gris}Développement et déploiement d'applications intelligentes}
+\rhead{\small\color{gris}Othmane Moussawi}
+\cfoot{\small\color{gris}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Encadrés
+\newtcolorbox{enonce}{colback=fondcode,colframe=accent,boxrule=0.6pt,
+  leftrule=3pt,arc=2pt,title={Énoncé},fonttitle=\bfseries,coltitle=white,colbacktitle=accent}
+\newtcolorbox{reponse}{colback=white,colframe=principal,boxrule=0.8pt,
+  arc=2pt,title={Réponse},fonttitle=\bfseries,coltitle=white,colbacktitle=principal}
+
+% Code
+\lstset{basicstyle=\ttfamily\footnotesize,backgroundcolor=\color{fondcode},
+  frame=single,rulecolor=\color{gris},breaklines=true,
+  keywordstyle=\color{principal}\bfseries,
+  commentstyle=\color{gris}\itshape,showstringspaces=false}
+
+\begin{document}
+
+% ---------- PAGE DE GARDE ----------
+\begin{titlepage}
+  \centering
+  \includegraphics[height=2.4cm]{logo_emsi}\par
+  \vspace{2.5cm}
+  {\color{gris}\large\textsc{Compte rendu de TP}\par}
+  \vspace{0.6cm}
+  {\color{principal}\rule{\textwidth}{1.2pt}\par}
+  \vspace{0.5cm}
+  {\Huge\bfseries\color{principal}Cadrer une application IA\\et préparer l'environnement\par}
+  \vspace{0.5cm}
+  {\color{principal}\rule{\textwidth}{1.2pt}\par}
+  \vspace{0.8cm}
+  {\Large Développement et déploiement d'applications intelligentes\par}
+  \vfill
+  {\large\textbf{Réalisé par}\par}
+  {\Large Othmane Moussawi\par}
+  {\large en binôme avec Ahmed Rayane Ramzi\par}
+  \vspace{0.6cm}
+  {\large Enseignant : A. Larhlimi\par}
+  \vspace{1.5cm}
+  {\large Année scolaire : 2026--2027\par}
+  {\large 14 octobre 2026\par}
+\end{titlepage}
+\thispagestyle{empty}
+\setcounter{page}{0}
+\newpage
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+Ce TP pose les fondations du projet \texttt{sentiment-app}. Il comporte deux parties : cadrer trois besoins métier avant tout développement, puis monter un dépôt Git reproductible, testé et partageable. Les objectifs sont de choisir l'approche adaptée à chaque cas, d'installer un environnement Python isolé et de faire passer les contrôles de diagnostic.
+
+\section{Cadrage de trois cas}
+
+\begin{enonce}
+Pour chacun des trois cas (ordonnances incomplètes en pharmacie, questions sur le règlement intérieur, avis clients négatifs), choisir une approche parmi : règles métier, machine learning, RAG ou modèle génératif seul. La justification doit citer au moins deux critères parmi (a) données étiquetées, (b) vérifiabilité, (c) coût par requête, (d) conséquence d'une erreur.
+\end{enonce}
+
+\subsection{Démarche}
+
+L'arbre de décision se lit dans l'ordre. Si la logique est connue et stable, on retient les \textbf{règles métier}. Sinon, si l'on dispose de données étiquetées, on retient le \textbf{machine learning}. Si la réponse doit être tirée de documents et citée, on retient le \textbf{RAG}. Le modèle génératif seul n'est retenu qu'en dernier recours.
+
+\subsection{Réalisation}
+
+Chaque fiche de cadrage est rédigée dans \texttt{docs/cadrage/} (\texttt{cas1-pharmacie.md}, \texttt{cas2-reglement.md}, \texttt{cas3-avis-negatifs.md}). Les rubriques obligatoires sont remplies et une seule case est cochée par fiche.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llp{7cm}}
+\toprule
+\textbf{Cas} & \textbf{Approche} & \textbf{Critères principaux} \\
+\midrule
+Ordonnances incomplètes & Règles métier & (a) pas d'étiquettes ; (b) explicabilité ; (d) erreur grave \\
+Règlement intérieur & RAG & (b) citer l'article ; (a) pas d'étiquettes ; (c) volume faible \\
+Avis négatifs & Machine learning & (a) étiquettes gratuites ; (c) volume élevé ; (d) erreur peu grave \\
+\bottomrule
+\end{tabular}
+\caption{Approche retenue pour chaque cas.}
+\end{table}
+
+\subsection{Interprétation}
+
+Pour le cas 3, le machine learning s'impose : la note en étoiles fournit gratuitement l'étiquette, le volume justifie un coût par requête très faible, et une erreur n'a qu'une conséquence limitée. Les deux autres cas montrent pourquoi l'approche change : le cas 1 relève de règles, car la liste des mentions obligatoires est réglementaire et une erreur est grave ; le cas 2 relève du RAG, car la réponse doit citer l'article source.
+
+\begin{reponse}
+Cas 1 : règles métier. Cas 2 : RAG. Cas 3 : machine learning.
+\end{reponse}
+
+\section{Environnement et dépôt Git}
+
+\subsection{Démarche}
+
+Le kit \texttt{sentiment-app} est décompressé, puis un environnement virtuel est créé et les dépendances installées. Le diagnostic \texttt{scripts/check\_setup.py} et les tests \texttt{pytest} vérifient la structure, les paquets et le \texttt{.gitignore}. Enfin, le dépôt Git est initialisé, versionné et publié sur GitHub.
+
+\subsection{Réalisation}
+
+\begin{itemize}[leftmargin=*]
+  \item Environnement virtuel créé avec \texttt{py -3.12 -m venv .venv}. Le poste ne disposant pas de Python 3.11, la version 3.12 a été utilisée ; le diagnostic l'accepte avec un avertissement, et la CI tourne en 3.11.
+  \item Paquets installés : \texttt{pandas}, \texttt{scikit-learn}, \texttt{pytest}, puis le reste de \texttt{requirements.txt} pour la suite.
+  \item Tests de cadrage (\texttt{tests/test\_cadrage.py}) : 12 tests verts après rédaction des fiches.
+  \item Diagnostic \texttt{check\_setup.py} : \textbf{0 erreur}, 2 avertissements dont un seul auteur de commits, avant que le binôme ne pousse son propre commit.
+  \item Git : \texttt{.venv/} n'apparaît pas dans \texttt{git status}, le \texttt{.gitignore} l'exclut bien.
+\end{itemize}
+
+Résultat de \texttt{pytest} sur le dépôt avant le commit du second membre : \textbf{44 passed, 1 failed}. Le seul échec est \texttt{test\_each\_member\_has\_committed}, qui exige deux auteurs de commits. Ce résultat ne correspond pas aux valeurs indiquées par l'énoncé (3 failed, 31 passed, 4 skipped) : le dépôt ayant déjà un historique et les fiches étant remplies, les tests conditionnels ne sont plus ignorés. Nous n'avons pas poussé plus loin cette comparaison.
+
+\subsection{Interprétation}
+
+Le point bloquant de cette partie est l'historique Git : un test vérifie qu'au moins deux personnes ont commit, ce qui ne peut être garanti que si chaque membre pousse depuis son propre poste et son propre compte. Le fichier \texttt{requirements.lock} est généré par \texttt{setup.ps1} sur chaque poste : un seul membre le commit.
+
+\begin{reponse}
+Environnement en place, diagnostic sans erreur, 44 tests verts sur 45. Le 45e test attend le commit du second membre.
+\end{reponse}
+
+\section{Incidents rencontrés}
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Environnement virtuel déplacé.} Le \texttt{.venv} pointait vers un ancien emplacement et était vide. Il a été supprimé puis recréé : un environnement virtuel n'est pas déplaçable.
+  \item \textbf{Fiches de cadrage hors du dépôt.} Les premières fiches avaient été rédigées hors de \texttt{docs/cadrage/}. Les fichiers versionnés restaient vides, et \texttt{test\_cadrage.py} échouait (3 échecs). Corrigé en réécrivant les fiches dans le bon dossier.
+  \item \textbf{Un seul auteur de commits.} Les commits initiaux portaient le même \texttt{user.name} ; le test d'historique reste rouge jusqu'au commit du second membre.
+\end{itemize}
+
+\section*{Conclusion}
+
+Les trois cas ont reçu une approche justifiée par les critères de la grille, et l'environnement répond aux contrôles de diagnostic. Le dépôt est prêt à recevoir la suite du projet dès que le binôme a poussé son commit.
+
+\end{document}

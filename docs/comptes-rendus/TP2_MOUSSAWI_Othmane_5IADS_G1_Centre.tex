@@ -1,0 +1,227 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm,headheight=15pt]{geometry}
+\usepackage{graphicx,xcolor,fancyhdr,titlesec,enumitem}
+\usepackage{amsmath,amssymb,booktabs,caption,float}
+\usepackage[most]{tcolorbox}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+
+% Palette
+\definecolor{principal}{HTML}{1F3A5F}
+\definecolor{accent}{HTML}{2E86AB}
+\definecolor{fondcode}{HTML}{F5F7FA}
+\definecolor{gris}{HTML}{6B7280}
+
+% Titres
+\titleformat{\section}{\Large\bfseries\color{principal}}{\thesection.}{0.6em}{}[\vspace{-0.4em}\color{accent}\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{accent}}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.6em}{0.8em}
+
+% En-tête / pied de page
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small\color{gris}Développement et déploiement d'applications intelligentes}
+\rhead{\small\color{gris}Othmane Moussawi}
+\cfoot{\small\color{gris}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Encadrés
+\newtcolorbox{enonce}{colback=fondcode,colframe=accent,boxrule=0.6pt,
+  leftrule=3pt,arc=2pt,title={Énoncé},fonttitle=\bfseries,coltitle=white,colbacktitle=accent}
+\newtcolorbox{reponse}{colback=white,colframe=principal,boxrule=0.8pt,
+  arc=2pt,title={Réponse},fonttitle=\bfseries,coltitle=white,colbacktitle=principal}
+
+% Code
+\lstset{basicstyle=\ttfamily\footnotesize,backgroundcolor=\color{fondcode},
+  frame=single,rulecolor=\color{gris},breaklines=true,
+  keywordstyle=\color{principal}\bfseries,
+  commentstyle=\color{gris}\itshape,showstringspaces=false}
+
+\begin{document}
+
+% ---------- PAGE DE GARDE ----------
+\begin{titlepage}
+  \centering
+  \includegraphics[height=2.4cm]{logo_emsi}\par
+  \vspace{2.5cm}
+  {\color{gris}\large\textsc{Compte rendu de TP}\par}
+  \vspace{0.6cm}
+  {\color{principal}\rule{\textwidth}{1.2pt}\par}
+  \vspace{0.5cm}
+  {\Huge\bfseries\color{principal}Entraîner, évaluer et sauvegarder\\un modèle de sentiment\par}
+  \vspace{0.5cm}
+  {\color{principal}\rule{\textwidth}{1.2pt}\par}
+  \vspace{0.8cm}
+  {\Large Développement et déploiement d'applications intelligentes\par}
+  \vfill
+  {\large\textbf{Réalisé par}\par}
+  {\Large Othmane Moussawi\par}
+  {\large en binôme avec Ahmed Rayane Ramzi\par}
+  \vspace{0.6cm}
+  {\large Enseignant : A. Larhlimi\par}
+  \vspace{1.5cm}
+  {\large Année scolaire : 2026--2027\par}
+  {\large 14 octobre 2026\par}
+\end{titlepage}
+\thispagestyle{empty}
+\setcounter{page}{0}
+\newpage
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+Ce TP transforme le cadrage du TP1 en un modèle concret. Le cas 3 (avis clients négatifs) relève du machine learning : il faut donc entraîner un classifieur de sentiment reproductible, l'évaluer correctement sur des données jamais vues, le sauvegarder pour l'interface du TP3, et comprendre ce qu'il se trompe à corriger. L'objectif n'est pas un modèle optimal, mais un modèle dont on sait ce qu'il vaut et pourquoi il se trompe.
+
+\section{Installation du kit}
+
+\subsection{Démarche}
+
+Le kit \texttt{tp2-semaine2-kit} est installé dans le dépôt par le script \texttt{appliquer\_tp2.py}, d'abord en simulation, puis pour de bon. Le script copie \texttt{src/}, \texttt{tests/test\_model.py} et le notebook, et ajoute \texttt{!models/metrics.json} au \texttt{.gitignore}.
+
+\subsection{Réalisation}
+
+Contrôle C1, \texttt{pytest -q} juste après l'installation : \textbf{3 failed, 37 passed, 2 skipped}. L'énoncé attend 2 failed, 38 passed, 2 skipped. Les deux échecs attendus réclament \texttt{models/metrics.json}, absent avant l'étape C. Le troisième échec est le test d'historique Git (un seul auteur de commits), qui n'est pas lié au modèle.
+
+\subsection{Interprétation}
+
+Le surplus d'échec vient du dépôt, non du kit : le test d'historique Git exige deux auteurs, ce que la séance ne peut pas garantir tant que le second membre n'a pas poussé.
+
+\section{Jeu de démonstration}
+
+\subsection{Démarche}
+
+Le script \texttt{src/make\_demo.py} génère un jeu d'avis en français, déterministe grâce à une graine fixe, composé d'avis nettement positifs, nettement négatifs, mitigés et neutres.
+
+\subsection{Réalisation}
+
+\begin{verbatim}
+python src/make_demo.py
+\end{verbatim}
+
+Sortie obtenue : 290 avis écrits dans \texttt{data/demo\_reviews.csv}, dont 145 positifs et 145 négatifs, avec 100 avis mitigés et 30 neutres. Le contrôle C2 est conforme.
+
+\subsection{Interprétation}
+
+Les avis mitigés ont une structure fixe : une première moitié d'un sentiment, un retournement (« mais finalement », « sauf que ensuite »), puis une seconde moitié de sentiment opposé. L'étiquette suit la seconde moitié. Cette structure annonce les erreurs de la partie 5.
+
+\section{Entraînement}
+
+\subsection{Démarche}
+
+Le découpage est fait \emph{avant} toute vectorisation, avec \texttt{test\_size=0.2}, une stratification sur l'étiquette et \texttt{random\_state=42}. Vectoriser d'abord laisserait le vocabulaire et les poids du TF-IDF connaître le jeu de test. Le \texttt{Pipeline} enferme le vectoriseur (\texttt{ngram\_range=(1, 2)}, \texttt{min\_df=2}, \texttt{sublinear\_tf=True}) et la régression logistique (\texttt{class\_weight="balanced"}) dans un seul objet, sauvegardé en entier.
+
+\subsection{Réalisation}
+
+\begin{verbatim}
+python src/train.py
+\end{verbatim}
+
+Sortie obtenue :
+\begin{verbatim}
+Source : demo, 290 avis (145 négatifs)
+232 avis d'entraînement, 58 de test
+Vocabulaire : 316 termes
+F1 macro sur le jeu de test : 0.879 (seuil 0.85)
+\end{verbatim}
+
+Les fichiers produits sont \texttt{models/sentiment.joblib} (non versionné) et \texttt{models/metrics.json} (versionné). Le contrôle C3 est conforme, et seul \texttt{metrics.json} apparaît dans \texttt{git status}.
+
+\subsection{Interprétation}
+
+Ce qui se reconstruit par une commande n'entre pas dans Git. Seule la mesure, \texttt{metrics.json}, est une preuve qui ne se reconstruit pas sans réentraîner : c'est pour cette raison que la CI peut vérifier le seuil sans jamais posséder le modèle.
+
+\section{Évaluation et analyse des erreurs}
+
+\subsection{Démarche}
+
+\texttt{src/evaluate.py} reprend exactement le même découpage (même graine, mêmes proportions) pour produire le rapport de classification et la matrice de confusion.
+
+\subsection{Réalisation}
+
+\begin{verbatim}
+python src/evaluate.py
+\end{verbatim}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lrr}
+\toprule
+ & \textbf{prédit négatif} & \textbf{prédit positif} \\
+\midrule
+\textbf{vérité négative} & 27 & 2 \\
+\textbf{vérité positive} & 5 & 24 \\
+\bottomrule
+\end{tabular}
+\caption{Matrice de confusion sur les 58 avis de test (jeu de démonstration).}
+\end{table}
+
+Le script affiche 7 erreurs sur 58. Le contrôle C4 est conforme : toutes les erreurs portent sur des avis mitigés. Trois exemples relevés :
+
+\begin{itemize}[leftmargin=*]
+  \item vérité positive, prédit négatif (confiance 0,53) : « Taille trop petite et retour payant au déballage, sauf que ensuite produit conforme à la description, très satisfait. »
+  \item vérité négative, prédit positif (confiance 0,56) : « Service impeccable et livraison en avance sur le papier, sauf que ensuite produit cassé à l'arrivée. »
+  \item vérité négative, prédit positif (confiance 0,69) : « Service impeccable et livraison en avance les premiers jours, avant que notice incompréhensible et pièces manquantes. »
+\end{itemize}
+
+\subsection{Interprétation}
+
+Les deux faux positifs sont le cas grave : un client mécontent traité en retard. Le mécanisme est celui d'un sac de mots, qui ne tient pas compte de l'ordre : « impeccable … puis cassé » et « cassé … puis impeccable » donnent un vecteur presque identique. Le modèle hésite d'ailleurs sur ces cas, avec des confiances entre 0,53 et 0,69. Corriger ce défaut demande une représentation sensible à l'ordre, comme des embeddings (semaine 9).
+
+\section{Le vrai jeu : Allociné}
+
+\subsection{Démarche}
+
+Le même code est lancé sur 20 000 critiques de films étiquetées, téléchargées depuis Hugging Face, avec le même découpage. Le jeu est près de soixante-dix fois plus grand que celui de démonstration.
+
+\subsection{Réalisation}
+
+\begin{verbatim}
+python src/train.py --allocine
+python -m pytest -q
+\end{verbatim}
+
+Sorties obtenues :
+\begin{verbatim}
+Source : allocine, 20000 avis (10204 négatifs)
+16000 avis d'entraînement, 4000 de test
+Vocabulaire : 149529 termes
+F1 macro sur le jeu de test : 0.920 (seuil 0.85)
+\end{verbatim}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lrr}
+\toprule
+ & \textbf{Démonstration} & \textbf{Allociné} \\
+\midrule
+Avis & 290 & 20 000 \\
+Vocabulaire & 316 termes & 149 529 termes \\
+F1 macro & 0,879 & 0,920 \\
+\bottomrule
+\end{tabular}
+\caption{Comparaison des deux jeux.}
+\end{table}
+
+Matrice de confusion sur 4 000 avis de test Allociné : 1 860 négatifs bien classés, 181 négatifs classés positifs, 137 positifs classés négatifs, 1 822 positifs bien classés (318 erreurs, soit 7,95 %).
+
+Avec \texttt{pytest -q}, on obtient \textbf{41 passed, 1 failed} : le test en échec est l'historique Git, qui attend le commit du second membre. Le contrôle C5 attend 42 passed après ce commit.
+
+\subsection{Interprétation}
+
+Le modèle n'a pas changé : ce sont les données qui ont changé. La mesure devient crédible, calculée sur 4 000 avis au lieu de 58. Sur Allociné, les négatifs manqués sont plus nombreux que les positifs manqués, à l'inverse de la démonstration.
+
+\begin{reponse}
+Modèle sauvegardé avec F1 macro 0,920 sur 4 000 avis. Erreurs principales : le sac de mots est insensible à l'ordre des phrases, ce qui pénalise les avis mitigés comme les textes qui se contredisent.
+\end{reponse}
+
+\section*{Conclusion}
+
+Le modèle est entraîné, évalué sur un jeu de test jamais vu, et sa mesure est versionnée. Le TP a aussi montré que les performances dépendent autant des données que du code : le même pipeline passe de 0,879 à 0,920 selon le jeu utilisé.
+
+\end{document}
