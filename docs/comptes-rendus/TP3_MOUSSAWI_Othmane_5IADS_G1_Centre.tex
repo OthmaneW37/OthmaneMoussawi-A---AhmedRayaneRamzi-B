@@ -1,0 +1,203 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm,headheight=15pt]{geometry}
+\usepackage{graphicx,xcolor,fancyhdr,titlesec,enumitem}
+\usepackage{amsmath,amssymb,booktabs,caption,float}
+\usepackage[most]{tcolorbox}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+
+% Palette
+\definecolor{principal}{HTML}{1F3A5F}
+\definecolor{accent}{HTML}{2E86AB}
+\definecolor{fondcode}{HTML}{F5F7FA}
+\definecolor{gris}{HTML}{6B7280}
+
+% Titres
+\titleformat{\section}{\Large\bfseries\color{principal}}{\thesection.}{0.6em}{}[\vspace{-0.4em}\color{accent}\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{accent}}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.6em}{0.8em}
+
+% En-tête / pied de page
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small\color{gris}Développement et déploiement d'applications intelligentes}
+\rhead{\small\color{gris}Othmane Moussawi}
+\cfoot{\small\color{gris}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Encadrés
+\newtcolorbox{enonce}{colback=fondcode,colframe=accent,boxrule=0.6pt,
+  leftrule=3pt,arc=2pt,title={Énoncé},fonttitle=\bfseries,coltitle=white,colbacktitle=accent}
+\newtcolorbox{reponse}{colback=white,colframe=principal,boxrule=0.8pt,
+  arc=2pt,title={Réponse},fonttitle=\bfseries,coltitle=white,colbacktitle=principal}
+
+% Code
+\lstset{basicstyle=\ttfamily\footnotesize,backgroundcolor=\color{fondcode},
+  frame=single,rulecolor=\color{gris},breaklines=true,
+  keywordstyle=\color{principal}\bfseries,
+  commentstyle=\color{gris}\itshape,showstringspaces=false}
+
+\begin{document}
+
+% ---------- PAGE DE GARDE ----------
+\begin{titlepage}
+  \centering
+  \includegraphics[height=2.4cm]{logo_emsi}\par
+  \vspace{2.5cm}
+  {\color{gris}\large\textsc{Compte rendu de TP}\par}
+  \vspace{0.6cm}
+  {\color{principal}\rule{\textwidth}{1.2pt}\par}
+  \vspace{0.5cm}
+  {\Huge\bfseries\color{principal}L'interface de démonstration\\Streamlit\par}
+  \vspace{0.5cm}
+  {\color{principal}\rule{\textwidth}{1.2pt}\par}
+  \vspace{0.8cm}
+  {\Large Développement et déploiement d'applications intelligentes\par}
+  \vfill
+  {\large\textbf{Réalisé par}\par}
+  {\Large Othmane Moussawi\par}
+  {\large en binôme avec Ahmed Rayane Ramzi\par}
+  \vspace{0.6cm}
+  {\large Enseignant : A. Larhlimi\par}
+  \vspace{1.5cm}
+  {\large Année scolaire : 2026--2027\par}
+  {\large 14 octobre 2026\par}
+\end{titlepage}
+\thispagestyle{empty}
+\setcounter{page}{0}
+\newpage
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+Ce TP rend le modèle du TP2 utilisable par quelqu'un qui n'ouvre jamais de terminal. L'interface Streamlit charge \texttt{models/sentiment.joblib} et appelle la fonction \texttt{predict()} du TP2 : aucune logique de prédiction n'est réécrite. Deux questions de conception sont au centre du TP : que montrer quand le modèle hésite, et quel chiffre l'équipe métier regarde en premier.
+
+\section{Installation et lancement}
+
+\subsection{Démarche}
+
+Le kit \texttt{tp3-streamlit-kit} est installé dans le dépôt par \texttt{appliquer\_tp3.py}, d'abord en simulation, puis pour de bon. L'interface est lancée avec \texttt{streamlit run ui/app.py}.
+
+\subsection{Réalisation}
+
+\begin{lstlisting}[language=bash]
+python appliquer_tp3.py ../sentiment-app
+streamlit run ui/app.py
+\end{lstlisting}
+
+Contrôle S1 : la page s'ouvre sur \texttt{http://localhost:8501} avec les trois onglets « Un avis », « Un fichier CSV » et « Comment ça marche ». Le contrôle est \textbf{conforme}, vérifié dans le navigateur.
+
+\subsection{Interprétation}
+
+La page se charge sans erreur parce que le modèle est présent. Sans lui, \texttt{charger\_predicteur()} lève une erreur explicite qui indique la commande à lancer, et la page s'arrête proprement au lieu de planter.
+
+\section{Onglet « Un avis »}
+
+\subsection{Démarche}
+
+La logique est dans \texttt{ui/helpers.py} : \texttt{classer()} ajoute au résultat de \texttt{predict()} un verdict lisible, « à vérifier » lorsque la confiance est inférieure à \texttt{SEUIL\_INCERTITUDE = 0.60}. Trois avis sont saisis, un net positif, un net négatif et un mitigé.
+
+\subsection{Réalisation}
+
+Résultats obtenus avec le modèle final, entraîné sur Allociné :
+
+\begin{table}[H]
+\centering
+\begin{tabular}{p{7cm}lrl}
+\toprule
+\textbf{Avis} & \textbf{Label} & \textbf{Confiance} & \textbf{Verdict} \\
+\midrule
+Livraison rapide, produit conforme, je recommande. & positive & 0,59 & à vérifier \\
+Produit cassé à l'arrivée et service client injoignable. & negative & 0,58 & à vérifier \\
+Emballage soigné et notice claire, sauf que ensuite application qui plante. & negative & 0,65 & negative \\
+\bottomrule
+\end{tabular}
+\caption{Verdicts de l'onglet « Un avis » avec le modèle Allociné.}
+\end{table}
+
+Contrôle S2 : \textbf{non conforme}. Le contrôle attend un verdict net pour les deux premiers avis, et « à vérifier » pour le troisième. Ici, les deux premiers sont signalés à vérifier, et le mitigé est tranché « négatif » à 65 %.
+
+Pour comparer, le modèle entraîné sur le jeu de démonstration (accuracy 0,879) a été utilisé brièvement : il donne 0,75 positif, 0,85 négatif, et « à vérifier » à 0,52 pour le mitigé, ce qui correspond à l'attendu. Ce test a été fait sur une copie temporaire ; le modèle Allociné a ensuite été restauré.
+
+\subsection{Interprétation}
+
+Le modèle Allociné a appris le vocabulaire des critiques de films (scénario, acteurs, mise en scène), et il connaît mal celui des avis produits (livraison, colis, service client). Il est donc peu sûr sur des avis courts de type e-commerce, même lorsqu'ils sont nets. Le seuil d'incertitude ne corrige pas ce décalage de domaine : seules des données étiquetées du bon domaine le feraient. Ce point est présenté comme un échec réel, et non comme un bug de l'interface.
+
+\section{Onglet « Un fichier CSV »}
+
+\subsection{Démarche}
+
+\texttt{predire\_lot()} écarte les lignes vides, refuse une colonne \texttt{review} absente avec un message explicite, puis \texttt{resumer()} calcule les métriques produit : nombre d'avis, part de négatifs et nombre d'avis à vérifier.
+
+\subsection{Réalisation}
+
+Le contrôle S3 demande de téléverser \texttt{data/demo\_reviews.csv} dans l'interface. \textbf{Ce téléversement n'a pas été fait dans le navigateur} ; nous avons seulement vérifié les fonctions de calcul sur ce fichier, avec le modèle Allociné :
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Seuil} & \textbf{Avis} & \textbf{Négatifs détectés (\%)} & \textbf{À vérifier} \\
+\midrule
+0,50 & 290 & 210 (72,4 \%) & 0 \\
+0,60 & 290 & 210 (72,4 \%) & 117 \\
+0,75 & 290 & 210 (72,4 \%) & 234 \\
+\bottomrule
+\end{tabular}
+\caption{Résumé du fichier de démonstration selon le seuil.}
+\end{table}
+
+Le fichier contient en réalité 145 négatifs sur 290, soit 50 %.
+
+\subsection{Interprétation}
+
+L'interface annonce 72,4 % de négatifs alors que la vérité est 50 %. Cet écart est trop grand pour être seulement celui des erreurs mesurées au TP2 sur les avis mitigés : le modèle Allociné classe beaucoup d'avis e-commerce en négatif, ce qui confirme le décalage de domaine de la partie précédente.
+
+\section{Seuil d'incertitude}
+
+\subsection{Démarche}
+
+Le seuil a été évalué sur les 4 000 avis de test Allociné, pour cinq valeurs entre 0,50 et 0,75. Pour chacune, on compte les avis envoyés à un agent et les négatifs classés positifs sans relecture.
+
+\subsection{Réalisation}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Seuil} & \textbf{Avis envoyés à un agent} & \textbf{Erreurs tranchées seules} & \textbf{Négatifs manqués} \\
+\midrule
+0,50 & 0 (0 \%) & 318 & 181 \\
+0,55 & 249 (6,2 \%) & 206 & 118 \\
+\textbf{0,60} & \textbf{509 (12,7 \%)} & \textbf{126} & \textbf{74} \\
+0,65 & 846 (21,1 \%) & 76 & 43 \\
+0,70 & 1 183 (29,6 \%) & 49 & 28 \\
+0,75 & 1 626 (40,6 \%) & 27 & 17 \\
+\bottomrule
+\end{tabular}
+\caption{Effet du seuil d'incertitude sur le jeu de test Allociné (4 000 avis).}
+\end{table}
+
+\subsection{Interprétation}
+
+Nous retenons \textbf{0,60}. Ce seuil divise par 2,4 le nombre de négatifs que le modèle laisse passer sans relecture (de 181 à 74), en échange d'environ un avis sur huit. Passer à 0,75 évite encore 57 négatifs manqués, mais envoie 1 117 avis de plus à la file humaine. Ce choix doit être arbitré avec l'équipe relation client, car il dépend du coût réel d'un client mécontent oublié.
+
+\begin{reponse}
+Seuil retenu : 0,60. Sur le jeu de test, 509 avis sur 4 000 (12,7 %) partent vers un agent, et les négatifs manqués passent de 181 à 74.
+\end{reponse}
+
+\section{Tests}
+
+Le test d'interface \texttt{tests/test\_ui.py} passe (3 tests). Sur l'ensemble du dépôt, \texttt{pytest -q} donne \textbf{44 passed, 1 failed} : le test en échec est l'historique Git, qui attend le commit du second membre. Le contrôle S4 attend 45 passed après ce commit.
+
+\section*{Conclusion}
+
+L'interface se lance et le code de prédiction reste celui du TP2. Le contrôle S2 révèle un décalage de domaine entre les critiques de films et les avis produits : c'est le résultat le plus important du TP, et il montre qu'une bonne mesure n'est valable que sur des données semblables à celles de production. Le contrôle S3 reste à faire dans le navigateur.
+
+\end{document}
