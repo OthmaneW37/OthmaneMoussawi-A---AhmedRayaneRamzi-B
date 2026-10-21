@@ -1,0 +1,24 @@
+[WARNING] Unstaged files detected.
+[INFO] Stashing unstaged files to C:\Users\NITRO 5\Downloads\OthmaneMoussawi-A---AhmedRayaneRamzi-B\.venv\.cache\pre-commit\patch1792601491-21464.
+ruff (erreurs probables, imports)........................................Failed
+- hook id: ruff
+- exit code: 1
+
+F401 [*] `os` imported but unused
+ --> scripts\essai_hook.py:1:8
+  |
+1 | import os
+  |        ^^
+help: Remove unused import: `os`
+  |
+  - import os
+  |
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.
+
+mypy (contrat typé de l'API).............................................Passed
+[INFO] Restored changes from C:\Users\NITRO 5\Downloads\OthmaneMoussawi-A---AhmedRayaneRamzi-B\.venv\.cache\pre-commit\patch1792601491-21464.
+
+Code : 1
+HEAD inchang? : True
