@@ -1,0 +1,48 @@
+{
+  "positif": {
+    "status": 200,
+    "body": {
+      "label": "POSITIVE",
+      "score": 0.777,
+      "text": "Livraison rapide, produit conforme, très satisfait"
+    }
+  },
+  "negatif": {
+    "status": 200,
+    "body": {
+      "label": "NEGATIVE",
+      "score": 0.7465,
+      "text": "Produit cassé et service injoignable, à fuir"
+    }
+  },
+  "inconnu": {
+    "status": 200,
+    "body": {
+      "label": "INDETERMINE",
+      "score": 0.5162,
+      "text": "xqzvb wlkptr grombu"
+    }
+  },
+  "espaces": {
+    "status": 422,
+    "body": {
+      "detail": [
+        {
+          "type": "value_error",
+          "loc": [
+            "body",
+            "text"
+          ],
+          "msg": "Value error, texte vide",
+          "input": "   ",
+          "ctx": {
+            "error": {}
+          }
+        }
+      ]
+    }
+  },
+  "lot_page": [
+    "{\"INDETERMINE\":1\"NEGATIVE\":2\"POSITIVE\":3}"
+  ]
+}
