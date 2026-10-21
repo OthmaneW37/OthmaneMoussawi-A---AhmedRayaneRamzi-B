@@ -1,0 +1,51 @@
+.FF.......F.....FF                                                       [100%]
+================================== FAILURES ===================================
+_____________________ test_frontieres_du_contrat[espaces] _____________________
+tests\test_limites.py:51: in test_frontieres_du_contrat
+    verifier_erreur(reponse.json())
+tests\test_limites.py:57: in verifier_erreur
+    assert isinstance(corps["detail"], list)
+E   AssertionError: assert False
+E    +  where False = isinstance('texte vide', list)
+__________________ test_frontieres_du_contrat[blanc-unicode] __________________
+tests\test_limites.py:51: in test_frontieres_du_contrat
+    verifier_erreur(reponse.json())
+tests\test_limites.py:57: in verifier_erreur
+    assert isinstance(corps["detail"], list)
+E   AssertionError: assert False
+E    +  where False = isinstance('texte vide', list)
+________________________ test_tout_texte_blanc_refuse _________________________
+tests\test_limites.py:80: in test_tout_texte_blanc_refuse
+    @given(texte=st.text(alphabet=BLANCS, min_size=1, max_size=2000))
+tests\test_limites.py:84: in test_tout_texte_blanc_refuse
+    verifier_erreur(reponse.json())
+tests\test_limites.py:57: in verifier_erreur
+    assert isinstance(corps["detail"], list)
+E   AssertionError: assert False
+E    +  where False = isinstance('texte vide', list)
+E   Failing test case: test_tout_texte_blanc_refuse(
+E       client=<starlette.testclient.TestClient object at 0x000001B8AC619ED0>,
+E       texte='\x85',  # or any other generated value
+E   )
+__________ test_panne_modele_repond_500_sans_detail_interne[erreur1] __________
+tests\test_integration.py:69: in test_panne_modele_repond_500_sans_detail_interne
+    assert reponse.status_code == 500
+E   assert 422 == 500
+E    +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+_______________________ test_classes_inconnues_refusees _______________________
+tests\test_integration.py:87: in test_classes_inconnues_refusees
+    with pytest.raises(ValueError, match="classes"), TestClient(app):
+E   Failed: DID NOT RAISE <class 'ValueError'>
+============================== warnings summary ===============================
+tests/test_limites.py::test_frontieres_du_contrat[texte-vide]
+  C:\Users\NITRO 5\Downloads\OthmaneMoussawi-A---AhmedRayaneRamzi-B\.venv\Lib\site-packages\starlette\testclient.py:37: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_limites.py::test_frontieres_du_contrat[espaces] - Assertion...
+FAILED tests/test_limites.py::test_frontieres_du_contrat[blanc-unicode] - Ass...
+FAILED tests/test_limites.py::test_tout_texte_blanc_refuse - AssertionError: ...
+FAILED tests/test_integration.py::test_panne_modele_repond_500_sans_detail_interne[erreur1]
+FAILED tests/test_integration.py::test_classes_inconnues_refusees - Failed: D...
+5 failed, 13 passed, 1 warning in 8.51s
