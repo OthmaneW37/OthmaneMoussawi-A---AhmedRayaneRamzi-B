@@ -1,56 +1,87 @@
-# sentiment-app : dépôt du binôme
+# sentiment-app : TP1 à TP5
 
-Application fil rouge du cours *Développement et déploiement d'applications intelligentes*.
-Un classifieur de sentiment qui fait remonter les avis clients négatifs en tête de file, construit en trois séances sur le même dépôt. Rien n'est jeté.
+Application du module *Développement et déploiement d'applications intelligentes*, mise à jour selon le guide de rattrapage d'octobre 2026. Le modèle TF-IDF et régression logistique classe les avis clients ; sous le seuil de confiance de 0,60, l'API répond `INDETERMINE` et demande une vérification humaine.
 
-| Séance | Ce que contient le dépôt | Documents |
+| TP | Réalisation | Compte rendu |
 | --- | --- | --- |
-| TP1 | Structure, environnement, trois fiches de cadrage | [docs/cadrage/](docs/cadrage/) |
-| TP2 | Modèle TF-IDF + régression logistique, évaluation, métriques versionnées | [docs/semaine2.md](docs/semaine2.md) |
-| TP3 | Interface de démonstration Streamlit | [docs/semaine3.md](docs/semaine3.md) |
-| Rendu | Compte rendu global | [docs/compte-rendu.md](docs/compte-rendu.md) |
+| TP1 | Environnement Python 3.11, Git et trois fiches de cadrage | [Fiches](docs/cadrage/) |
+| TP2 | Entraînement, évaluation et prédiction reproductibles | [Semaine 2](docs/semaine2.md) |
+| TP3 | API FastAPI : `/health`, `/predict`, `/docs` | [Semaine 3](docs/semaine3.md) |
+| TP4 | Contrat, abstention, jeu d'or, intégration et qualité | [Semaine 4](docs/semaine4.md) |
+| TP5 | Interface Streamlit cliente de l'API, avis seul et CSV | [Semaine 5](docs/semaine5.md) |
 
-## Démarrage rapide
+Le [journal de rattrapage](docs/journal-tp1-tp5.md) distingue les contrôles rejoués des vérifications à faire par chaque membre sur son poste. Les documents de l'ancienne version où le TP3 était une interface directe restent dans [les archives](docs/archives/) et [les anciens comptes rendus](docs/comptes-rendus/).
 
-```bash
-python -m venv .venv
-source .venv/bin/activate        # Windows PowerShell : .venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+## Installation sous PowerShell
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt -r requirements-dev.txt
 python scripts/check_setup.py
-pytest -q
+python src/make_demo.py
+python src/train.py
+python src/evaluate.py
+pre-commit install
 ```
 
-## Reconstruire le modèle et lancer l'interface
+`requirements.txt` contient les dépendances de tout le semestre. Le verrou `requirements.lock` enregistre les versions installées sur le poste Windows. La contrainte directe `pyarrow==21.0.*` a été retirée conformément au guide pour laisser MLflow et Streamlit sélectionner une version compatible.
 
-Le modèle n'est jamais versionné : il se reconstruit sur chaque poste. Seule sa mesure, `models/metrics.json`, est dans Git.
+L'entraînement par défaut utilise les 290 avis de démonstration, comme la CI et les tests des TP3 à TP5. L'option `python src/train.py --allocine` permet l'expérience du TP2 sur les 20 000 avis Allociné ; relancer ensuite `python src/train.py` avant les vérifications de l'API et du jeu d'or.
 
-```bash
-python src/make_demo.py          # data/demo_reviews.csv : 290 avis de démonstration
-python src/train.py --allocine   # models/sentiment.joblib, F1 macro 0,920
-python src/evaluate.py           # matrice de confusion
-python src/predict.py "Livraison rapide, très satisfait"
-streamlit run ui/app.py          # http://localhost:8501
+`models/sentiment.joblib`, les données générées, `.venv/` et `.env` sont ignorés par Git. Seules les métriques et les petits jeux d'évaluation sont versionnés.
+
+## Démarrer les deux applications
+
+Dans deux terminaux, depuis la racine du dépôt, avec `.venv` activé :
+
+```powershell
+# Terminal 1 : API et documentation interactive
+uvicorn api.main:app --reload
+# http://127.0.0.1:8000/docs
 ```
 
-Une fois le modèle entraîné, `pytest -q` affiche 45 passed. En CI, où le modèle est absent, les quatre tests qui en ont besoin sont ignorés.
+```powershell
+# Terminal 2 : interface
+streamlit run ui/app.py --server.headless true
+# http://localhost:8501
+```
 
-## Captures des tests (TP1)
+L'interface envoie des requêtes HTTP ; elle ne charge jamais le modèle. `API_URL` permet de choisir l'adresse du service. L'onglet CSV attend une colonne `text` ; [data/avis_exemple.csv](data/avis_exemple.csv) contient six exemples.
 
-### Avant correction
+## Vérifier et afficher l'avancement
 
-État initial du diagnostic : les dépendances Python ne sont pas encore installées et les trois fiches de cadrage ne contiennent pas encore d'approche cochée.
+Le [pas-à-pas pour la présentation au professeur](docs/presenter-au-prof.md)
+donne chaque commande, les résultats attendus et les essais dans le navigateur.
 
-![Diagnostic initial avant correction](docs/captures/tests-avant-correction.png)
+Dernière vérification locale : **102 tests réussis, 4 erreurs connues attendues**,
+aucun échec ni test ignoré ; couverture de l'API **97,70 %**.
+La CI sur clone neuf a également réussi. Le journal conserve les mesures et les
+points nécessitant encore la validation du binôme.
 
-### Après correction des fiches
+```powershell
+git log --oneline -10
+git status
+python -m pytest -q
+python -m pytest tests/ -v
+python -m pytest tests/test_api.py -q
+python -m pytest tests/test_limites.py -q
+python -m pytest tests/test_jeu_or.py -q
+python -m pytest tests/test_client.py -q
+ruff check .
+mypy api
+python -m pytest -q --cov=api --cov-report=term-missing --cov-fail-under=95
+python src/courbe_seuil.py
+python src/bilan_jeu_or.py
+```
 
-Les trois approches sont cochées dans les fiches de cadrage. À ce stade, il restait 2 erreurs et 1 avertissement liés à la configuration Python et aux commits du binôme ; ils ont été résolus depuis.
-
-![Diagnostic après correction des fiches](docs/captures/tests-apres-correction-fiches.png)
+La CI entraîne le modèle de démonstration avant les tests, puis exécute ruff, mypy et pytest avec au moins 95 % de couverture de l'API. Les erreurs connues du jeu d'or restent documentées et sont attendues avec `xfail(strict=True)`.
 
 ## Membres du binôme
 
-| Rôle | Nom | Identifiant GitHub | Travail de la semaine 1 |
-| --- | --- | --- | --- |
-| Membre A | Othmane Moussawi | @OthmaneW37 | Cadrage des trois cas et préparation de l'environnement |
-| Membre B | Ahmed Rayane Ramzi | @RayaneRZ24  | Cadrage des trois cas et préparation de l'environnement |
+| Rôle | Nom | GitHub |
+| --- | --- | --- |
+| Membre A | Othmane Moussawi | @OthmaneW37 |
+| Membre B | Ahmed Rayane Ramzi | @RayaneRZ24 |
+
+Chaque membre doit refaire les essais sur son poste et commiter sous son identité.

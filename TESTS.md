@@ -1,107 +1,48 @@
-# Démarche à suivre pour le test
+# Vérifier les TP1 à TP5
 
-Ce dépôt se vérifie de deux façons, qui contrôlent les mêmes choses : `scripts/check_setup.py` parle aux humains (lignes OK, ATTENTION, ERREUR) et `pytest` parle à la machine (38 tests, repris par la CI et par la notation).
+Depuis la racine du dépôt, créer et activer `.venv`, puis installer les deux fichiers de dépendances :
 
-Huit contrôles, T0 à T7. Le pas-à-pas complet de la séance est dans `MARCHE-A-SUIVRE.md` ; ce document détaille les tests eux-mêmes.
-
-## T0. Le kit est complet
-
-```bash
-ls
-ls -a | grep gitignore         # Windows PowerShell : ls -Force | findstr gitignore
-```
-
-Les sept dossiers (`app`, `data`, `docs`, `models`, `scripts`, `tests`, `ui`), les fichiers de documentation, `requirements.txt`, `pytest.ini`, et `.gitignore`, qui ne s'affiche pas avec un `ls` simple.
-
-## T1. L'état de départ
-
-```bash
-python -m venv .venv
-source .venv/bin/activate          # Windows : .venv\Scripts\Activate.ps1
-pip install pandas scikit-learn pytest
-pytest -q
-```
-
-Attendu : **3 failed, 31 passed, 4 skipped**.
-
-- les 3 échecs sont dans `tests/test_cadrage.py` : les fiches sont vides (partie A) ;
-- les 4 tests ignorés attendent un dépôt Git : 3 dans `tests/test_git_history.py`, 1 dans `tests/test_environment.py` ;
-- les 31 verts confirment la structure, les paquets et le `.gitignore`.
-
-## T2. Les fiches de cadrage
-
-```bash
-pytest tests/test_cadrage.py -q
-```
-
-Attendu : **12 passed**. Les quatre contrôles : trois fichiers `docs/cadrage/cas*.md` ; les huit rubriques obligatoires présentes dans chacun ; chaque rubrique remplie (au moins 20 caractères hors consigne) ; exactement une case `- [x]` et au moins deux critères `(a)` à `(d)` cités dans la justification.
-
-## T3. Rien d'indésirable dans le dépôt
-
-```bash
-git add -A
-git status
-```
-
-Aucune ligne commençant par `.venv/`. Le script `bash scripts/init_depot.sh <url>` refuse d'ailleurs de pousser si `.venv/` est en attente.
-
-## T4. Le diagnostic
-
-```bash
+```powershell
+python -m pip install -r requirements.txt -r requirements-dev.txt
 python scripts/check_setup.py
+python src/make_demo.py
+python src/train.py
 ```
 
-Cinq blocs (Python, Paquets, Structure, Git, Fiches), puis `N erreur(s), M avertissement(s)`. Code de sortie 1 s'il reste une erreur.
+L'API, les tests du jeu d'or et l'interface sont vérifiés avec le modèle de démonstration, comme dans la CI. Le modèle et les données générées ne doivent jamais être commités.
 
-| Ligne | Sens |
-| --- | --- |
-| `OK` | rien à faire |
-| `ATTENTION` | ne bloque pas, mais doit disparaître avant la fin de la séance |
-| `ERREUR` | bloque : venv non activé, paquet absent, dossier manquant, pas de dépôt Git, `.venv/` suivi |
+## Vérification complète
 
-## T5. Les deux membres ont commité
-
-```bash
-git shortlog -sn --all
-pytest tests/test_git_history.py -q
+```powershell
+.\scripts\verifier.ps1 -Detail
 ```
 
-Attendu : deux noms distincts, puis **3 passed**. Le message `1 auteur(s) de commits, 2 attendus` signale soit qu'un membre n'a pas poussé, soit que les deux postes partagent le même `user.name`.
+Le script interrompt le contrôle dès qu'une commande échoue. Il ne lance pas de serveur et ne modifie pas Git. L'entraînement actualise `models/metrics.json` et crée le modèle local ignoré par Git.
 
-## T6. Tout, comme la CI
+## Commandes séparées
 
-```bash
-pytest -q
+```powershell
+python -m pytest -q
+python -m pytest tests/ -v
+python -m pytest tests/test_api.py -q
+python -m pytest tests/test_limites.py -q
+python -m pytest tests/test_jeu_or.py -q
+python -m pytest tests/test_integration.py -q
+python -m pytest tests/test_client.py tests/test_interface.py -q
+ruff check .
+mypy api
+python -m pytest -q --cov=api --cov-report=term-missing --cov-fail-under=95
 ```
 
-Attendu : **38 passed** (23 + 12 + 3), et `0 erreur(s), 0 avertissement(s)` au diagnostic. Poussez, puis vérifiez l'onglet Actions : le workflow rejoue ces 38 tests sur une machine neuve, en Python 3.11.
+Les tests HTTP utilisent `TestClient` avec son contexte de démarrage réel. Les tests de page utilisent `streamlit.testing.v1.AppTest`. Il n'est pas nécessaire de démarrer uvicorn ni Streamlit pour pytest. Hypothesis vérifie les textes Unicode et les blancs ; les propriétés doivent passer trois exécutions successives.
 
-## T7. Le test de l'enseignant
+## Qualité à chaque commit
 
-```bash
-bash scripts/verif_clone.sh https://github.com/<organisation>/sentiment-app.git
+```powershell
+pre-commit install
+pre-commit run --all-files
 ```
 
-Le script clone dans un dossier temporaire, installe `requirements.txt`, lance le diagnostic et les tests, puis nettoie. Attendu : **0 erreur(s)** et **38 passed**, sans aucune intervention manuelle.
+Activer `.venv` avant de commiter : les hooks locaux utilisent `ruff` et `mypy` de cet environnement. La CI réentraîne le modèle, lance les deux outils puis impose 95 % de couverture de `api/`.
 
-À la main, si vous préférez voir chaque commande :
-
-```bash
-cd /tmp
-git clone https://github.com/<organisation>/sentiment-app.git verif
-cd verif
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-python scripts/check_setup.py
-pytest -q
-```
-
-## Les trois états de référence
-
-| État | check_setup.py | pytest |
-| --- | --- | --- |
-| Kit décompressé, pas de dépôt Git, fiches vides | 1 erreur, 3 avertissements | 3 failed, 31 passed, 4 skipped |
-| Dépôt initialisé, un seul auteur, fiches vides | 0 erreur, 4 avertissements | 4 failed, 34 passed |
-| Fin du TP : fiches remplies, deux auteurs | 0 erreur, 0 avertissement | 38 passed |
-
-En cas d'échec, `DEPANNAGE.md` liste les messages et leur correction.
+Les sorties et les limites des contrôles effectués sont consignées dans [le journal](docs/journal-tp1-tp5.md) et [les mesures TP4](docs/semaine4.md). Les anciens états attendus du TP1 seul sont conservés dans [l'ancien document](docs/archives/ancien-TESTS.md).
