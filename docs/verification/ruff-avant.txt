@@ -1,0 +1,243 @@
+B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+  --> api\main.py:76:9
+   |
+74 |         result = clf.predict(request.text)
+75 |     except ValueError as e:
+76 |         raise HTTPException(status_code=422, detail=str(e))
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+77 |     except Exception:
+78 |         logger.exception("Erreur lors de la prédiction")
+   |
+
+B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+  --> api\main.py:79:9
+   |
+77 |     except Exception:
+78 |         logger.exception("Erreur lors de la prédiction")
+79 |         raise HTTPException(status_code=500, detail="Erreur interne du serveur")
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+80 |     logger.info("predict: %r -> %s (%.2f)", request.text[:50], result["label"], result["score"])
+81 |     return result
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> api\model.py:11:1
+   |
+ 9 | RACINE = Path(__file__).resolve().parents[1]
+10 | sys.path.insert(0, str(RACINE / "src"))
+11 | from predict import MODELE, charger_modele, predict as _predict  # noqa: E402  (fonctions du TP2)
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: Organize imports
+   |
+10 | sys.path.insert(0, str(RACINE / "src"))
+   - from predict import MODELE, charger_modele, predict as _predict  # noqa: E402  (fonctions du TP2)
+11 + from predict import MODELE, charger_modele  # noqa: E402  (fonctions du TP2)
+12 + from predict import predict as _predict
+13 |
+   |
+
+F401 [*] `predict.MODELE` imported but unused
+  --> api\model.py:11:21
+   |
+ 9 | RACINE = Path(__file__).resolve().parents[1]
+10 | sys.path.insert(0, str(RACINE / "src"))
+11 | from predict import MODELE, charger_modele, predict as _predict  # noqa: E402  (fonctions du TP2)
+   |                     ^^^^^^
+help: Remove unused import: `predict.MODELE`
+   |
+10 | sys.path.insert(0, str(RACINE / "src"))
+   - from predict import MODELE, charger_modele, predict as _predict  # noqa: E402  (fonctions du TP2)
+11 + from predict import charger_modele, predict as _predict  # noqa: E402  (fonctions du TP2)
+12 |
+   |
+
+F401 [*] `sklearn.metrics.ConfusionMatrixDisplay` imported but unused
+  --> src\evaluate.py:13:29
+   |
+12 | import joblib
+13 | from sklearn.metrics import ConfusionMatrixDisplay, classification_report, confusion_matrix
+   |                             ^^^^^^^^^^^^^^^^^^^^^^
+14 | from sklearn.model_selection import train_test_split
+   |
+help: Remove unused import: `sklearn.metrics.ConfusionMatrixDisplay`
+   |
+12 | import joblib
+   - from sklearn.metrics import ConfusionMatrixDisplay, classification_report, confusion_matrix
+13 + from sklearn.metrics import classification_report, confusion_matrix
+14 | from sklearn.model_selection import train_test_split
+   |
+
+B905 `zip()` without an explicit `strict=` parameter
+  --> src\evaluate.py:44:23
+   |
+42 |     print("Matrice de confusion (lignes = vérité, colonnes = prédiction)")
+43 |     print(f"{'':>10}{ETIQUETTES[0]:>10}{ETIQUETTES[1]:>10}")
+44 |     for nom, ligne in zip(ETIQUETTES, mc):
+   |                       ^^^^^^^^^^^^^^^^^^^
+45 |         print(f"{nom:>10}{ligne[0]:>10}{ligne[1]:>10}")
+   |
+help: Add explicit value for parameter `strict=`
+
+B905 `zip()` without an explicit `strict=` parameter
+  --> src\evaluate.py:52:41
+   |
+51 |     # Trois erreurs à lire, pour comprendre ce que le sac de mots ne voit pas
+52 |     erreurs = [(t, v, p) for t, v, p in zip(X_test, y_test, y_pred) if v != p]
+   |                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+53 |     print(f"\n{len(erreurs)} erreurs au total. Trois exemples :")
+54 |     for texte, vrai, predit in erreurs[:3]:
+   |
+help: Add explicit value for parameter `strict=`
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests\test_api.py:16:5
+   |
+14 |   @pytest.fixture(scope="module")
+15 |   def client():
+16 | /     from fastapi.testclient import TestClient
+17 | |     from api.main import app
+   | |____________________________^
+18 |       with TestClient(app) as c:  # le "with" déclenche lifespan (chargement du modèle)
+19 |           yield c
+   |
+help: Organize imports
+   |
+16 |     from fastapi.testclient import TestClient
+17 +
+18 |     from api.main import app
+   |
+
+E741 Ambiguous variable name: `l`
+  --> tests\test_cadrage.py:51:23
+   |
+49 |             # ignorer les lignes de consigne (citations) et les cases à cocher
+50 |             body = "\n".join(
+51 |                 l for l in body.splitlines() if l.strip() and not l.startswith(">") and not l.startswith("- [")
+   |                       ^
+52 |             )
+53 |             if len(body) < 20:
+   |
+
+E741 Ambiguous variable name: `l`
+  --> tests\test_environment.py:38:28
+   |
+37 | def test_requirements_pins_versions(root: Path):
+38 |     lines = [l.strip() for l in (root / "requirements.txt").read_text().splitlines()]
+   |                            ^
+39 |     lines = [l for l in lines if l and not l.startswith("#")]
+40 |     assert lines, "requirements.txt est vide"
+   |
+
+E741 Ambiguous variable name: `l`
+  --> tests\test_environment.py:39:20
+   |
+37 | def test_requirements_pins_versions(root: Path):
+38 |     lines = [l.strip() for l in (root / "requirements.txt").read_text().splitlines()]
+39 |     lines = [l for l in lines if l and not l.startswith("#")]
+   |                    ^
+40 |     assert lines, "requirements.txt est vide"
+41 |     for line in lines:
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests\test_integration.py:27:5
+   |
+26 |   def test_modele_absent_refuse_demarrage(monkeypatch, tmp_path):
+27 | /     import predict
+28 | |     from fastapi.testclient import TestClient
+29 | |
+30 | |     from api.main import app
+   | |____________________________^
+31 |
+32 |       predict.charger_modele.cache_clear()
+   |
+help: Organize imports
+   |
+26 | def test_modele_absent_refuse_demarrage(monkeypatch, tmp_path):
+   -     import predict
+27 |     from fastapi.testclient import TestClient
+28 |
+29 +     import predict
+30 |     from api.main import app
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests\test_integration.py:75:5
+   |
+74 |   def test_classes_inconnues_refusees(monkeypatch):
+75 | /     import joblib
+76 | |     import predict
+77 | |     from fastapi.testclient import TestClient
+78 | |
+79 | |     from api.main import app
+   | |____________________________^
+80 |
+81 |       class ModeleIncompatible:
+   |
+help: Organize imports
+   |
+75 |     import joblib
+   -     import predict
+76 |     from fastapi.testclient import TestClient
+77 |
+78 +     import predict
+79 |     from api.main import app
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests\test_limites.py:6:1
+   |
+ 4 |   Ce fichier vérifie cette promesse à ses frontières, puis au hasard (hypothesis).
+ 5 |   """
+ 6 | / import json
+ 7 | | from pathlib import Path
+ 8 | |
+ 9 | | import pytest
+10 | | from hypothesis import given, settings, strategies as st
+   | |________________________________________________________^
+11 |
+12 |   MODELE = Path(__file__).resolve().parents[1] / "models" / "sentiment.joblib"
+   |
+help: Organize imports
+   |
+9  | import pytest
+   - from hypothesis import given, settings, strategies as st
+10 + from hypothesis import given, settings
+11 + from hypothesis import strategies as st
+12 |
+   |
+
+E741 Ambiguous variable name: `l`
+  --> ui\helpers.py:47:44
+   |
+45 |         raise ValueError("aucun avis exploitable dans le fichier")
+46 |     sortie = df.loc[df[colonne].fillna("").astype(str).str.strip() != ""].copy()
+47 |     sortie["prediction"] = [l["label"] for l in lignes]
+   |                                            ^
+48 |     sortie["confiance"] = [round(l["score"], 3) for l in lignes]
+49 |     sortie["verdict"] = [l["verdict"] for l in lignes]
+   |
+
+E741 Ambiguous variable name: `l`
+  --> ui\helpers.py:48:53
+   |
+46 |     sortie = df.loc[df[colonne].fillna("").astype(str).str.strip() != ""].copy()
+47 |     sortie["prediction"] = [l["label"] for l in lignes]
+48 |     sortie["confiance"] = [round(l["score"], 3) for l in lignes]
+   |                                                     ^
+49 |     sortie["verdict"] = [l["verdict"] for l in lignes]
+50 |     return sortie
+   |
+
+E741 Ambiguous variable name: `l`
+  --> ui\helpers.py:49:43
+   |
+47 |     sortie["prediction"] = [l["label"] for l in lignes]
+48 |     sortie["confiance"] = [round(l["score"], 3) for l in lignes]
+49 |     sortie["verdict"] = [l["verdict"] for l in lignes]
+   |                                           ^
+50 |     return sortie
+   |
+
+Found 17 errors.
+[*] 7 fixable with the `--fix` option (2 hidden fixes can be enabled with the `--unsafe-fixes` option).
