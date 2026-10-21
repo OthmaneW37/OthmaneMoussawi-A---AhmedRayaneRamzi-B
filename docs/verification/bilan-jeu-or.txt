@@ -1,0 +1,22 @@
+abstention               INDETERMINE  0.58  attendu POSITIVE  Colis livré avant mon départ et article en parfait état
+juste                    POSITIVE     0.76  attendu POSITIVE  Le vendeur a remplacé gratuitement la pièce manquante,
+abstention               INDETERMINE  0.50  attendu POSITIVE  Les coutures sont solides et la taille correspond exact
+abstention               INDETERMINE  0.51  attendu POSITIVE  Installation facile et fonctionnement silencieux, cet a
+erreur franche déclarée  NEGATIVE     0.62  attendu POSITIVE  La conseillère a résolu mon problème au premier appel a
+abstention               INDETERMINE  0.51  attendu NEGATIVE  Après une semaine d'attente le colis n'est toujours pas
+abstention               INDETERMINE  0.56  attendu NEGATIVE  Le chargeur a cessé de fonctionner le lendemain et le v
+abstention               INDETERMINE  0.52  attendu NEGATIVE  J'ai reçu la mauvaise référence et on me demande de pay
+erreur franche déclarée  POSITIVE     0.63  attendu NEGATIVE  L'emballage était déchiré et l'écran présentait une lon
+juste                    NEGATIVE     0.70  attendu NEGATIVE  Deux prélèvements pour une seule commande et aucun remb
+juste                    POSITIVE     0.70  attendu POSITIVE  Je ne regrette absolument pas cet achat, le résultat es
+erreur franche déclarée  POSITIVE     0.71  attendu NEGATIVE  Ce produit n'est ni fiable ni conforme à la description
+abstention               INDETERMINE  0.57  attendu NEGATIVE  Service impeccable, vraiment : trois semaines sans répo
+juste                    NEGATIVE     0.62  attendu NEGATIVE  Livraison rapide, merci beaucoup pour le produit cassé
+juste                    POSITIVE     0.61  attendu POSITIVE  Le carton était abîmé mais le produit est intact et fon
+abstention               INDETERMINE  0.50  attendu NEGATIVE  La couleur est jolie mais le mécanisme se bloque chaque
+abstention               INDETERMINE  0.53  attendu NEGATIVE  Le train était propre mais les deux heures de retard m'
+abstention               INDETERMINE  0.56  attendu POSITIVE  Le rendez-vous a commencé à l'heure et le médecin a pri
+abstention               INDETERMINE  0.57  attendu POSITIVE  Les premières minutes étaient ennuyeuses, puis le film
+erreur franche déclarée  POSITIVE     0.61  attendu NEGATIVE  Le repas était bon mais les allergènes annoncés sur la
+
+Bilan sur 20 avis : abstention 11, erreur franche déclarée 4, juste 5
