@@ -1,7 +1,13 @@
-# Semaine 3 : le seuil d'incertitude
+# Semaine 3 : exposer le modèle par une API
 
-Nous retenons le seuil par défaut `SEUIL_INCERTITUDE = 0.60` : sur les 4 000 avis du jeu de test Allociné, il envoie 509 avis à un agent (12,7 %) et fait tomber les erreurs tranchées automatiquement de 318 à 126, dont les négatifs classés positifs (le cas grave, un client mécontent traité en retard) de 181 à 74.
+Vérifications refaites le 21 octobre 2026 avec le modèle de démonstration : les six tests du kit API passent. Les essais HTTP réels donnent `/health` en 200, un avis positif à 0,777 et un négatif à 0,7465. Les corps vides, sans champ `text` ou avec un nombre sont refusés en 422. Les réponses des essais sont dans [essais-http.json](verification/essais-http.json).
 
-À 0,50 aucun avis n'est vérifié et les 181 négatifs manqués passent inaperçus ; à 0,75 on n'en manque plus que 17, mais 1 626 avis (40,6 %) partent vers la file humaine, ce qui annule l'intérêt de l'automatisation pour une équipe qui reçoit des milliers d'avis par jour ; 0,60 divise par plus de deux les négatifs manqués pour une charge de relecture d'environ un avis sur huit, un compromis que nous jugeons tenable et qu'il faudrait valider avec l'équipe relation client.
+## 1. Pourquoi refuser de démarrer sans modèle ?
 
-Limite observée : sur nos avis e-commerce de démonstration, le modèle entraîné sur des critiques de films hésite beaucoup plus (117 avis sur 290 envoyés à un agent au même seuil, et 72,4 % de négatifs annoncés pour 50 % réels), et un avis net comme « Livraison rapide, produit conforme, je recommande. » ressort « à vérifier » à 59 % ; le seuil ne corrige pas ce changement de domaine, seules des données étiquetées du bon domaine le feraient.
+Le contexte de démarrage charge `models/sentiment.joblib` avant de servir la première requête. Le test `test_modele_absent_refuse_demarrage` redirige ce chemin vers un fichier absent, vide le cache et observe un `FileNotFoundError` à l'ouverture de `TestClient`. Une instance sans modèle n'est donc jamais annoncée prête. Le 503 garde un autre rôle : signaler un modèle retiré ou indisponible après le démarrage ; nous vérifions ce cas sur `/health` et `/predict`.
+
+## 2. Le double refus d'un texte vide est-il redondant ?
+
+Les deux contrôles protègent deux points d'entrée : Pydantic valide le contrat HTTP, tandis que `predict()` peut être appelée directement depuis Python ou le terminal. Au départ du kit, les espaces passaient le schéma puis donnaient un 422 avec un `detail` sous forme de chaîne. Le TP4 ajoute le même contrôle `str.strip()` au schéma : tous les blancs, y compris U+0085, sont maintenant refusés avant le modèle, dans la liste standard d'erreurs Pydantic. Une `ValueError` venant ensuite du modèle est une panne interne et reçoit 500, sans divulguer son message.
+
+![Santé de l'API réellement démarrée](captures/tp3-t15-health.png)
