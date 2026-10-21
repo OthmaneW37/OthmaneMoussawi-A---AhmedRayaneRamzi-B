@@ -1,0 +1,27 @@
+........................................................................ [ 67%]
+x...x..x.......x..................                                       [100%]
+============================== warnings summary ===============================
+tests/test_api.py::test_root
+  C:\Users\NITRO 5\Downloads\OthmaneMoussawi-A---AhmedRayaneRamzi-B\.venv\Lib\site-packages\starlette\testclient.py:37: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.11.9-final-0 _______________
+
+Name             Stmts   Miss  Cover   Missing
+----------------------------------------------
+api\main.py         42      2    95%   84-86
+api\model.py        21      0   100%
+api\schemas.py      24      0   100%
+----------------------------------------------
+TOTAL               87      2    98%
+
+1 empty file skipped.
+Required test coverage of 95% reached. Total coverage: 97.70%
+=========================== short test summary info ===========================
+XFAIL tests/test_jeu_or.py::test_pas_d_erreur_franche[ligne-6] - Faux négatif observé au-dessus du seuil 0.60 : le vocabulaire du problème domine malgré sa résolution.
+XFAIL tests/test_jeu_or.py::test_pas_d_erreur_franche[ligne-10] - Faux positif observé : vocabulaire des dégâts peu représenté dans les 290 avis.
+XFAIL tests/test_jeu_or.py::test_pas_d_erreur_franche[ligne-13] - Faux positif observé : le sac de mots conserve conforme et description sans comprendre ni...ni.
+XFAIL tests/test_jeu_or.py::test_pas_d_erreur_franche[ligne-21] - Faux positif observé : le modèle e-commerce ne comprend pas le risque lié aux allergènes.
+102 passed, 4 xfailed, 1 warning in 14.28s
