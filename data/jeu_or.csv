@@ -1,0 +1,21 @@
+text,attendu,difficulte,erreur_connue
+"Colis livré avant mon départ et article en parfait état, merci à toute l'équipe.",POSITIVE,,
+"Le vendeur a remplacé gratuitement la pièce manquante, je suis satisfait.",POSITIVE,,
+"Les coutures sont solides et la taille correspond exactement à ma commande.",POSITIVE,,
+"Installation facile et fonctionnement silencieux, cet achat me convient.",POSITIVE,,
+"La conseillère a résolu mon problème au premier appel avec beaucoup de patience.",POSITIVE,,"Faux négatif observé au-dessus du seuil 0.60 : le vocabulaire du problème domine malgré sa résolution."
+"Après une semaine d'attente le colis n'est toujours pas parti et personne ne répond.",NEGATIVE,,
+"Le chargeur a cessé de fonctionner le lendemain et le vendeur refuse le retour.",NEGATIVE,,
+"J'ai reçu la mauvaise référence et on me demande de payer la correction.",NEGATIVE,,
+"L'emballage était déchiré et l'écran présentait une longue fissure.",NEGATIVE,,"Faux positif observé : vocabulaire des dégâts peu représenté dans les 290 avis."
+"Deux prélèvements pour une seule commande et aucun remboursement malgré mes relances.",NEGATIVE,,
+"Je ne regrette absolument pas cet achat, le résultat est excellent.",POSITIVE,négation,
+"Ce produit n'est ni fiable ni conforme à la description.",NEGATIVE,négation,"Faux positif observé : le sac de mots conserve conforme et description sans comprendre ni...ni."
+"Service impeccable, vraiment : trois semaines sans réponse et toujours aucun colis.",NEGATIVE,ironie,
+"Livraison rapide, merci beaucoup pour le produit cassé et le service injoignable.",NEGATIVE,ironie,
+"Le carton était abîmé mais le produit est intact et fonctionne très bien.",POSITIVE,avis mitigé,
+"La couleur est jolie mais le mécanisme se bloque chaque matin, je demande un retour.",NEGATIVE,avis mitigé,
+"Le train était propre mais les deux heures de retard m'ont fait rater mon entretien.",NEGATIVE,autre domaine transport,
+"Le rendez-vous a commencé à l'heure et le médecin a pris le temps de tout expliquer.",POSITIVE,autre domaine santé,
+"Les premières minutes étaient ennuyeuses, puis le film m'a captivé jusqu'au générique.",POSITIVE,autre domaine cinéma et retournement,
+"Le repas était bon mais les allergènes annoncés sur la carte étaient faux.",NEGATIVE,autre domaine restauration et avis mitigé,"Faux positif observé : le modèle e-commerce ne comprend pas le risque lié aux allergènes."
